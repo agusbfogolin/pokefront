@@ -1,0 +1,50 @@
+import fs from 'node:fs';
+import vm from 'node:vm';
+import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url),root={window:{}};
+for(const file of ['moves','species','items'])vm.runInNewContext(fs.readFileSync(new URL('../dist/assets/'+file+'.js',import.meta.url),'utf8'),root);
+const r=root.window,F=require('../dist/core.js')(r.SPECIES_DATA,r.MOVE_DATA,r.SPECIES_KITS,r.EVOLUTION_DATA,r.TYPE_CHART,r.EXTRA_MOVE_RULES);
+require('../dist/progression.js')(F,r.SPECIES_LEARNSETS,r.SPECIES_MOVE_LEVELS,r.SPECIES_ULTIMATES);
+require('../dist/campaign.js')(F);require('../dist/economy.js')(F,r.ITEM_DATA);require('../dist/generations.js')(F);
+const C=require('../dist/combat.js')(F),clone=x=>JSON.parse(JSON.stringify(x));
+const expected={1:['tackle','growl'],4:['scratch','growl'],7:['tackle','tail-whip'],25:['thunder-shock','growl'],152:['tackle','growl'],155:['tackle','leer'],158:['scratch','leer'],252:['pound','leer'],255:['scratch','growl'],258:['tackle','growl'],387:['tackle','withdraw'],390:['scratch','leer'],393:['pound','growl'],495:['tackle','leer'],498:['tackle','tail-whip'],501:['tackle','tail-whip'],650:['tackle','growl','vine-whip'],653:['scratch','tail-whip','ember'],656:['pound','growl','bubble'],722:['tackle','leafage','growl'],725:['scratch','ember','growl'],728:['pound','water-gun','growl'],810:['scratch','growl'],813:['tackle','growl'],816:['pound','growl'],906:['scratch','tail-whip','leafage'],909:['tackle','leer','ember'],912:['pound','growl','water-gun']};
+assert.equal(Object.values(F.GENERATIONS).flatMap(g=>g.starters).length,28);
+for(const [id,kit] of Object.entries(expected)){
+ const s=F.newState('INITIAL',Number(id)),c=s.team[0];
+ assert.equal(c.level,5);assert.deepEqual(c.progression.loadout,kit,id);assert.deepEqual(c.progression.learned,kit,id);
+ assert.equal(F.moves(c).length,kit.length);assert.equal(c.progression.ultimate,undefined);
+ const b=C.create(c,{creature:F.makeCreature(19,5,77)},12);b.intro=0;
+ for(let slot=kit.length;slot<5;slot++)assert.equal(C.canUse(b,0,'m'+slot).ready,false,id+' empty slot '+slot);
+ F.ensureProgress(s);F.upgradeState(s);assert.deepEqual(c.progression.loadout,kit);assert.ok(F.validState(clone(s)));
+ const caught=F.makeCreature(Number(id),5,88);F.ensureCreatureProgress(caught);assert.deepEqual(caught.progression.loadout,kit,'capture '+id);
+}
+console.log('PASS all 28 starters: debut-game moves, two/three slots, no filler, new/caught/reloaded consistency');
+const s=F.newState('LEVELS',1),c=s.team[0],hp=c.hp;c.progression.xp=2000;
+F.buySkill(s,'pokemon',{index:0},'discipline');
+assert.equal(F.canLearnMove(s,0,'leech-seed').reason,'Nv. 7');
+assert.equal(F.learnCatalog(c).find(e=>e.key==='vine-whip').level,13);
+assert.equal(F.learnCatalog(F.makeCreature(4,5,9)).find(e=>e.key==='ember').level,9);
+assert.equal(F.learnCatalog(F.makeCreature(152,5,9)).find(e=>e.key==='razor-leaf').level,8);
+assert.equal(F.learnCatalog(F.makeCreature(813,5,9)).find(e=>e.key==='ember').level,6);
+function approve(key){const t=F.beginLearnTrial(s,0,key,1000);assert.ok(t.ok,key);let out;for(const value of t.sequence)out=F.learnTrialInput(s,value,4300);assert.ok(out.passed,key);return out;}
+c.level=7;const wallet=F.skillPoints(c.progression,'pokemon');const t=F.beginLearnTrial(s,0,'leech-seed',1000);assert.ok(t.ok);
+assert.equal(F.learnTrialInput(s,(t.sequence[0]+1)%4,4300).passed,false);
+assert.equal(F.skillPoints(c.progression,'pokemon'),wallet);assert.ok(F.canLearnMove(F.upgradeState(clone(s)),0,'leech-seed').blocked);
+c.level=8;assert.ok(approve('leech-seed').equipped);assert.deepEqual(c.progression.loadout,['tackle','growl','leech-seed']);
+c.level=13;assert.ok(approve('vine-whip').equipped);assert.equal(c.progression.loadout.length,4);
+c.level=20;const before=clone(c.progression.loadout);assert.equal(approve('poison-powder').equipped,false);assert.deepEqual(c.progression.loadout,before);
+assert.ok(F.equipMove(s,0,1,'poison-powder'));assert.equal(c.progression.loadout[1],'poison-powder');assert.ok(c.progression.learned.includes('growl'));
+assert.equal(F.equipMove(s,0,4,'growl'),false);assert.ok(F.validState(clone(s)));assert.equal(c.hp,hp);
+console.log('PASS canonical levels, failed-trial lock, free-space filling, four-move replacement and exact PS');
+const evolving=F.newState('EVOLUTION',1),e=evolving.team[0];e.level=32;assert.ok(F.evolve(e,0,2));assert.equal(e.progression.loadout.length,2);assert.ok(F.evolve(e,0,3));assert.equal(e.progression.loadout.length,2);
+const finalMoves=F.moves(e);assert.deepEqual(finalMoves.map(m=>m.slot),[0,1,4]);assert.ok(e.progression.learned.includes(e.progression.ultimate));
+const finalBattle=C.create(e,{creature:F.makeCreature(19,32,9)},4);finalBattle.intro=0;assert.equal(C.canUse(finalBattle,0,'m2').ready,false);assert.ok(C.action(finalBattle,0,'m4'));assert.equal(finalBattle.roster[0].ultimateUsed,true);
+const ditto=C.create(F.makeCreature(132,32,5),{creature:e},6);ditto.intro=0;assert.ok(C.action(ditto,0,'m0'));for(let n=0;n<65;n++)C.step(ditto,1/60,{},false);assert.deepEqual(C.moves(ditto.fighters[0]).map(m=>m.slot),[0,1,4]);assert.equal(C.canUse(ditto,0,'m2').ready,false);
+assert.ok(F.validState(F.upgradeState(clone(evolving))));
+console.log('PASS evolution retains empty slots; ultimate stays on key 5, including Transform');
+function legacy(wins=0){const s=F.newState('OLD',4),c=s.team[0],kit=F.KITS[4];c.wins=wins;c.progression={xp:wins*40,nodes:{},learnSpent:0,learned:[...kit],loadout:[...kit],moves:Object.fromEntries(kit.map(k=>[k,{xp:0,nodes:{}}]))};return s;}
+const unused=legacy(),oldHP=unused.team[0].hp;assert.ok(F.validState(unused));F.upgradeState(unused);assert.deepEqual(unused.team[0].progression.loadout,expected[4]);assert.equal(unused.team[0].hp,oldHP);
+const played=legacy(1),playedKit=clone(played.team[0].progression.loadout);F.upgradeState(played);assert.deepEqual(played.team[0].progression.loadout,playedKit);assert.ok(F.validState(clone(played)));
+const one=F.newState('ONE',4);one.team[0].progression.loadout=['scratch'];F.upgradeState(one);assert.equal(one.team[0].progression.loadout.length,1);assert.ok(F.validState(clone(one)));const bad=clone(one);bad.team[0].progression.loadout=['scratch',null,'growl'];assert.equal(F.validState(bad),false);
+console.log('PASS untouched legacy starter correction, trained-save preservation, one/two/three-slot validation');

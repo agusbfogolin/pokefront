@@ -1,0 +1,16 @@
+/* Branching skills: one common root, two paths, progressive nested choices. */
+.skillsdialog{width:min(980px,calc(100vw - 24px));max-width:980px}
+.skillprogression{margin:18px 0;border:1px solid #c6d2b5;border-radius:12px;padding:14px;background:#eef3e4}
+.skilltiers{display:flex;gap:8px;flex-wrap:wrap}.skilltiers span{padding:6px 10px;border-radius:20px;font-size:11px;background:#dce3d3;color:#78816e}.skilltiers .unlocked{background:#d2e6b7;color:#2b502c;font-weight:700}
+.skillprogression p{font-size:12px;line-height:1.6;margin:9px 0 0;color:#526348}
+.skilltree{display:block;padding:0;margin:24px 0}.skilltree>.skillnode.rootnode{width:min(480px,85%);margin:0 auto 24px}
+.skilltree .skillnode{width:100%;min-height:148px;box-sizing:border-box}.skilltree .skillnode::before,.skilltree .skillnode::after{display:none}
+.skillbranches{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.skillbranch{min-width:0;position:relative;border:1px solid #c4ceb7;border-radius:14px;padding:15px;background:#f1f4e8}.skillbranch.branchchosen{border-color:#719451;background:#f5f8ee}.skillbranch.branchlocked{background:#e8ebe2}
+.skillbranch .skillpath{margin:0 0 18px;font-size:14px}.basebranch{display:grid;gap:16px;border-left:2px solid #bdcca7;margin-left:6px;padding-left:12px}
+.skillorigin{font-size:10px;line-height:1.5;color:#738064}.skillnode.tierlocked{border-style:dashed;background:#e9ecdf}.skillnode.tierlocked em{color:#746e57}
+.treestage{margin-top:17px;border-top:1px solid #cbd5be;padding-top:12px}.treestage summary{cursor:pointer;font-weight:700;font-size:13px;color:#3d5c39;padding:8px 0;line-height:1.5}.treestage summary small{display:block;font-size:11px;font-weight:400;color:#75826a;margin-left:15px}
+.skillfork{margin:12px 0 17px;border-left:2px solid #bccca4;padding-left:10px}.forklabel{margin:0 0 10px!important;font-size:11px!important;font-weight:700;color:#61774f;line-height:1.6}
+.forkoptions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.forkoptions .skillnode{min-height:180px;padding:15px 11px}.forkoptions .skillnode strong{font-size:12px;padding:19px 0 0}.forkoptions .noderank{top:10px;right:11px}.forkoptions .skillnode small{font-size:11px}.forkoptions .skillnode em{font-size:10px}
+@media(max-width:680px){.skillsdialog{padding:22px 16px}.skillbranches{grid-template-columns:1fr;gap:20px}.skillbranch{padding:13px}.skilltree>.skillnode.rootnode{width:100%;min-height:128px}.forkoptions .skillnode{min-height:174px}.skilltiers{gap:5px}.skilltiers span{padding:5px 8px;font-size:10px}}
+@media(max-width:380px){.forkoptions{grid-template-columns:1fr}.forkoptions .skillnode{min-height:138px}.forkoptions .skillnode strong{padding-top:0;padding-right:44px}}

@@ -1,0 +1,5 @@
+index.html.bak-*
+dist/client/
+node_modules/
+Thumbs.db
+.DS_Store
