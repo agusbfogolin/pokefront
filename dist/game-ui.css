@@ -397,7 +397,7 @@ body.keyboard-input .adventure-menu-card:focus-visible,body.keyboard-input .star
 .skillnode.available{box-shadow:inset 0 0 0 2px var(--g-grass),0 4px 0 #04090b,0 0 16px #8ee36b33;background:linear-gradient(180deg,#2c5a3f,#173b2b)}
 .skillnode.available em{color:var(--g-grass)}
 .skillnode.learned{box-shadow:inset 0 0 0 3px var(--g-gold),0 4px 0 #04090b;background:linear-gradient(180deg,#4a4219,#2a2410)}
-.skillnode.pathlocked,.skillnode.tierlocked{background:#0d1a1e;box-shadow:inset 0 0 0 2px #26403d;opacity:.7}
+.skillnode.pathlocked,.skillnode.tierlocked,.skillnode.prereqlocked{background:#0d1a1e;box-shadow:inset 0 0 0 2px #26403d;opacity:.7}
 .skillnode::before,.rootnode::after{background:#3d6a5c}
 .noderank{font-family:var(--g-px);font-size:8px;color:var(--g-gold)}
 .skillbranch{background:#0c1b20;border:0;box-shadow:inset 0 0 0 2px #26403d}
@@ -635,3 +635,8 @@ img{image-rendering:pixelated}
 .startercard b{font-size:10px;margin:8px 0 5px}
 .all-starters .startergrid{max-height:60vh}
 @media(max-width:680px){.startercard .starterart{width:92px;height:92px}}
+
+/* Correr: botón de alternancia (táctil) */
+#runBtn[aria-pressed="true"]{background:linear-gradient(180deg,#ffe27a,#ffc21f);color:#2b1d00;box-shadow:var(--g-bevel),0 5px 0 #8a5a00,0 7px 0 #04090b}
+#runBtn[aria-pressed="true"] kbd{background:#0002;color:#2b1d00}
+body.inbattle #runBtn{display:none}

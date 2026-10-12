@@ -1,0 +1,34 @@
+/* Level-up celebration inside the result dialog. */
+.levelup{margin:14px 0 6px;padding:14px 12px 12px;border-radius:14px;text-align:center;background:radial-gradient(ellipse at 50% 0,#3b5f2c55,#0000 70%),#10242a;box-shadow:inset 0 0 0 2px var(--g-gold,#e8c34f);overflow:hidden;position:relative}
+.levelup.hidden{display:none}
+.lvl-stage{position:relative;height:118px;display:grid;place-items:center}
+.lvl-sprite{position:relative;z-index:2;animation:lvlPop .8s cubic-bezier(.2,1.6,.4,1) both}
+.lvl-ring{position:absolute;width:110px;height:110px;border-radius:50%;border:3px solid var(--g-gold,#e8c34f);opacity:0;animation:lvlRing 1.3s .15s ease-out 2}
+.lvl-spark{position:absolute;left:50%;top:50%;width:8px;height:8px;margin:-4px;border-radius:2px;background:var(--c);opacity:0;animation:lvlSpark 1.1s var(--delay) ease-out both;transform:rotate(45deg)}
+.lvl-title{margin:4px 0 0;font:700 15px/1.4 var(--g-px,inherit);letter-spacing:.08em;color:var(--g-gold,#e8c34f);text-shadow:0 0 14px #e8c34f88;animation:lvlGlow 1.4s ease-in-out infinite alternate}
+.lvl-level{margin:2px 0 10px;font-size:14px;color:var(--ink,#f4f1d8)}
+.lvl-num{display:inline-block;min-width:1.6em;font-size:26px;color:#fff}.lvl-num.bump{animation:lvlBump .35s ease-out}
+.lvl-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px;max-width:430px;margin:0 auto 10px;text-align:left}
+.lvl-stat{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:baseline;font-size:12px;color:var(--muted,#a9b9a5);padding:3px 8px;border-radius:7px;background:#ffffff0d;opacity:0;animation:lvlSlide .45s calc(.55s + var(--i)*.1s) ease-out forwards}
+.lvl-stat em{font-style:normal}.lvl-stat.up strong{color:var(--g-grass,#8ee36b)}.lvl-stat.up{background:#8ee36b1c}
+.lvl-rewards{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:6px}
+.lvl-chip{padding:5px 10px;border-radius:99px;font-size:12px;font-weight:700;color:#173b2b;background:linear-gradient(90deg,#ffd86b,#fff3b8,#ffd86b);background-size:200% 100%;animation:lvlShine 2s linear infinite,lvlSlide .45s 1.3s ease-out both}
+.lvl-chip.evo{background:linear-gradient(90deg,#7fd8ff,#e6f8ff,#7fd8ff);background-size:200% 100%}
+.lvl-moves{margin-top:10px;padding:10px;border-radius:12px;background:#8ee36b14;box-shadow:inset 0 0 0 1px #8ee36b66}
+.lvl-moves-title{margin:0 0 8px;font-weight:700;font-size:13px;color:var(--g-grass,#8ee36b)}
+.lvl-movelist{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.lvl-move{position:relative;display:flex;flex-direction:column;align-items:center;gap:1px;padding:8px 12px 6px;border-radius:10px;background:#173b2b;box-shadow:inset 0 0 0 2px var(--g-grass,#8ee36b);opacity:0;animation:lvlMove .5s calc(1.5s + var(--i)*.15s) cubic-bezier(.2,1.5,.4,1) forwards}
+.lvl-move small{position:absolute;top:-7px;right:-4px;padding:1px 6px;border-radius:6px;font-size:9px;font-weight:700;color:#173b2b;background:var(--g-gold,#e8c34f);animation:lvlBlink 1s steps(2) infinite}
+.lvl-move b{font-size:13px;color:#fff}.lvl-move em{font-style:normal;font-size:10px;color:var(--muted,#a9b9a5)}.lvl-move.more{background:none;box-shadow:none;font-size:12px;color:var(--muted,#a9b9a5);justify-content:center}
+.lvl-hint{margin:8px 0 6px;font-size:11px;color:var(--muted,#a9b9a5)}
+@keyframes lvlPop{0%{transform:scale(.2) translateY(30px);opacity:0}100%{transform:none;opacity:1}}
+@keyframes lvlRing{0%{transform:scale(.4);opacity:.9}100%{transform:scale(1.9);opacity:0}}
+@keyframes lvlSpark{0%{transform:translate(0,0) rotate(45deg) scale(.4);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(225deg) scale(1);opacity:0}}
+@keyframes lvlGlow{from{text-shadow:0 0 6px #e8c34f66}to{text-shadow:0 0 18px #ffe58f}}
+@keyframes lvlBump{0%{transform:scale(1)}50%{transform:scale(1.5);color:#ffe58f}100%{transform:scale(1)}}
+@keyframes lvlSlide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes lvlShine{to{background-position:-200% 0}}
+@keyframes lvlMove{0%{opacity:0;transform:scale(.3) rotate(-8deg)}100%{opacity:1;transform:none}}
+@keyframes lvlBlink{50%{opacity:.35}}
+@media(max-width:520px){.lvl-stats{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.levelup *{animation-duration:.01s!important;animation-delay:0s!important;animation-iteration-count:1!important}.lvl-spark,.lvl-ring{display:none}}

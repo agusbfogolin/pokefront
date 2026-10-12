@@ -39,7 +39,7 @@ for(const result of ['win','caught','escaped','loss']){
 {
  const s=fresh(),c=s.team[0];c.hp=c.maxHP-25;const currentHP=c.hp,oldMax=c.maxHP;c.level++;
  F.creatureHealth(c);assert.ok(c.maxHP>oldMax);assert.equal(c.hp,currentHP,'level growth does not heal');
- c.progression.xp=1000;assert.ok(F.buySkill(s,'pokemon',{index:0},'discipline'));assert.ok(F.buySkill(s,'pokemon',{index:0},'resolve'));F.creatureHealth(c);assert.equal(c.hp,currentHP,'HP skill does not heal');
+ c.progression.levelGain=5;assert.ok(F.buySkill(s,'pokemon',{index:0},'discipline'));assert.ok(F.buySkill(s,'pokemon',{index:0},'resolve'));F.creatureHealth(c);assert.equal(c.hp,currentHP,'HP skill does not heal');
  F.setCreatureHP(c,0);c.level++;F.creatureHealth(c);assert.equal(c.hp,0,'levels never revive');
  for(const value of [-1,Infinity,NaN,c.maxHP+1]){const bad=clone(s);bad.team[0].hp=value;assert.equal(F.validState(bad),false)}
  const old=clone(s);for(const c of old.team){delete c.hp;delete c.maxHP}const identity=old.team[0].uid;

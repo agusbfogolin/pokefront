@@ -21,17 +21,23 @@ for(let n=0;n<12;n++){const gap=480-values.reduce((a,b)=>a+b,0);if(Math.abs(gap)
 const rounded=values.map(Math.floor);let left=480-rounded.reduce((a,b)=>a+b,0);const order=values.map((v,i)=>({i,f:v-Math.floor(v)})).sort((a,b)=>b.f-a.f);for(let i=0;i<left;i++)rounded[order[i%6].i]++;return rounded}
 const COMBAT_BASE=Object.fromEntries(Object.keys(DATA).map(id=>[id,combatBase(id)]));
 function makeCreature(id,level,seed){const r=rng(seed),up=Math.floor(r()*5),down=Math.floor(r()*5);return{id:Number(id),uid:String(seed)+'-'+id,level:clamp(level,1,100),iv:Array.from({length:6},()=>Math.floor(r()*32)),ev:[0,0,0,0,0,0],nature:{name:NATURE_NAMES[up][down],up:up===down?-1:NATURE_ORDER[up],down:up===down?-1:NATURE_ORDER[down]},xp:0,training:0,wins:0}}
-function stats(c){return COMBAT_BASE[c.id].map((base,i)=>{let v=Math.floor((2*base+c.iv[i]+Math.floor(c.ev[i]/4))*c.level/100);if(i===0)return v+c.level+10;return Math.floor((v+5)*(c.nature.up===i?1.1:c.nature.down===i?.9:1))})}
+// c.ev now stores plain training points (no 252 / 510 EV caps). Each point adds exactly +1 to its stat
+// (+6 PS for the health stat). Any single stat may take as many points as you like, but the TOTAL is
+// limited by level (1.2 points per level), so a build specialises instead of maxing everything.
+function trainedPoints(c,i){return c.ev[i]||0}
+function trainBudget(c){return Math.floor(c.level*1.2)}
+function trainRoom(c){return Math.max(0,trainBudget(c)-c.ev.reduce((a,b)=>a+b,0))}
+function stats(c){return COMBAT_BASE[c.id].map((base,i)=>{const v=Math.floor((2*base+c.iv[i])*c.level/100),t=trainedPoints(c,i);if(i===0)return v+c.level+10+t;return Math.floor((v+5)*(c.nature.up===i?1.1:c.nature.down===i?.9:1))+t})}
 function maxHP(c){return Math.max(1,Math.round(stats(c)[0]*6*(api.pokemonBonuses?.(c)?.hp||1)))}
 // Keep current PS exactly when rewards, training or evolution increase capacity.
 // Recovery is explicit; fainted companions stay at zero. Legacy creatures initialize once.
 function creatureHealth(c){const max=maxHP(c);if(!Number.isFinite(c.hp))c.hp=max;c.maxHP=max;c.hp=clamp(c.hp,0,max);return{hp:c.hp,maxHP:max}}
 function setCreatureHP(c,hp,maximum=maxHP(c)){c.hp=clamp(hp,0,maximum);c.maxHP=maximum;return creatureHealth(c)}
 function healTeam(s){for(const c of s.team)setCreatureHP(c,maxHP(c));return s}
-function train(c,i){if(c.training<1||i<0||i>5||c.ev[i]>=252||c.ev.reduce((a,b)=>a+b,0)>=510)return false;let gain=Math.min(4,252-c.ev[i],510-c.ev.reduce((a,b)=>a+b,0));c.ev[i]+=gain;c.training--;return true}
+function train(c,i){if(c.training<1||!Number.isInteger(i)||i<0||i>5||trainRoom(c)<1)return false;c.ev[i]++;c.training--;return true}
 function xpNext(c){return Math.floor(((c.level+1)**3-c.level**3)/3)+8}
 function award(c,amount){c.xp+=amount;let levels=0;while(c.level<100&&c.xp>=xpNext(c)){c.xp-=xpNext(c);c.level++;levels++}if(c.level===100)c.xp=0;c.training+=4;c.wins++;return levels}
-function evolve(c,shards,target){const e=evolutionOptions(c).find(e=>target===undefined||e.target===Number(target));if(!e||shards<e.cost||c.level<e.level)return false;c.id=e.target;return true}
+function evolve(c,shards,target){const e=evolutionOptions(c).find(e=>target===undefined||e.target===Number(target));if(!e||shards<e.cost||(api.evolutionReady?!api.evolutionReady(c,e):c.level<e.level))return false;c.id=e.target;return true}
 const chart=TYPE_CHART||{psychic:{fighting:2,poison:2,psychic:.5,steel:.5},normal:{rock:.5,ghost:0,steel:.5},fire:{grass:2,water:.5,fire:.5,rock:.5,bug:2,steel:2},water:{fire:2,rock:2,ground:2,water:.5,grass:.5},grass:{water:2,rock:2,ground:2,fire:.5,grass:.5,poison:.5,flying:.5,bug:.5,steel:.5},electric:{water:2,flying:2,electric:.5,grass:.5,ground:0},fighting:{normal:2,rock:2,steel:2,poison:.5,flying:.5,bug:.5,ghost:0},rock:{fire:2,flying:2,bug:2,fighting:.5,ground:.5,steel:.5},ground:{fire:2,electric:2,poison:2,rock:2,steel:2,grass:.5,bug:.5,flying:0},ghost:{ghost:2,normal:0},poison:{grass:2,poison:.5,rock:.5,ground:.5,ghost:.5,steel:0},flying:{grass:2,fighting:2,bug:2,electric:.5,rock:.5,steel:.5},steel:{rock:2,fire:.5,water:.5,electric:.5,steel:.5},bug:{grass:2,fire:.5,fighting:.5,poison:.5,flying:.5,ghost:.5,steel:.5}};
 function effectiveness(type,defTypes){let m=1;for(const t of defTypes)m*=chart[type]?.[t]??1;return m===0?.25:m>=4?2.2:m>1?1.6:clamp(Math.sqrt(m),.5,1)}
 const MOVE_RULES={
@@ -166,30 +172,30 @@ Object.assign(MOVE_RULES,EXTRA_MOVE_RULES||{});
 function isFinal(c){return evolutionOptions(c).length===0}
 function defaultUltimate(c){const keys=KITS[c.id]||[];return [...keys].sort((a,b)=>(MOVE_DATA[b]?.power||0)-(MOVE_DATA[a]?.power||0))[0]}
 function moves(c){const equipped=c.progression?.loadout||KITS[c.id];if(!equipped)throw Error('Missing species kit '+c.id);const kit=equipped.slice(0,4).map((key,slot)=>({key,slot}));if(c.ultimateEligible??isFinal(c))kit.push({key:c.progression?.ultimate||defaultUltimate(c),slot:4});return kit.map(({key,slot:i})=>{const canonical=MOVE_DATA[key],r=MOVE_RULES[key];if(!canonical||!r)throw Error('Missing move '+key);const m={key,...canonical,kind:'projectile',range:450,width:30,radius:18,speed:300,delay:i===0?.4:i===4?.9:.6,cooldown:[2.8,5.5,10,6.5,18][i],cost:[12,21,18,20,32][i],energyCost:[3,6,4,5,9][i],anim:canonical.special||!canonical.power?'Shoot':'Attack',...r,level:1,slot:i,ultimate:i===4};m.originalPower=canonical.power;if(m.power>0)m.power=Math.round((i===4?105:i===0?55:i===3?65:75)*(m.kind==='melee'?1.2:m.kind==='lunge'?1.05:1)*(m.drain>0?.85:1));if(m.ultimate&&m.duration)m.duration*=1.3;return m})}
-const TOWN={name:'Ciudad Brote',bounds:{left:-736,right:736,top:-608,bottom:608},spawn:{x:16,y:32},buildings:[
-{id:'lab',x:-320,y:-224,w:192,h:128,label:'LABORATORIO',roof:'#697e87',wall:'#e1e3cb'},
-{id:'gym',x:128,y:-224,w:192,h:128,label:'GIMNASIO',roof:'#536b5f',wall:'#d6cda6'},
-{id:'clinic',x:-80,y:112,w:160,h:112,label:'CENTRO',roof:'#ae7565',wall:'#e3dcc4'},
-{id:'house1',x:-320,y:96,w:128,h:96,label:'',roof:'#a39768',wall:'#e3d3ac'},
-{id:'house2',x:192,y:96,w:128,h:96,label:'',roof:'#788d67',wall:'#dfdbc2'},
-{id:'academy',x:-624,y:-464,w:240,h:144,label:'ACADEMIA',roof:'#63828c',wall:'#dde4d2'},
-{id:'guild',x:320,y:-480,w:240,h:160,label:'CASA DE TIPOS',roof:'#786e91',wall:'#e1d9c9'},
-{id:'market',x:-624,y:240,w:208,h:128,label:'MERCADO',roof:'#b58555',wall:'#eadcc0'},
-{id:'school',x:368,y:304,w:240,h:128,label:'DOJO',roof:'#728764',wall:'#dce1be'},
-{id:'house3',x:-656,y:-96,w:128,h:112,label:'',roof:'#858e60',wall:'#e1d7b5'},
-{id:'house4',x:544,y:-96,w:128,h:112,label:'',roof:'#95796a',wall:'#ddd8c1'},
-{id:'house5',x:-320,y:352,w:128,h:112,label:'',roof:'#738781',wall:'#dde1c7'},
-{id:'house6',x:128,y:352,w:128,h:112,label:'',roof:'#8c865e',wall:'#e5ddbe'}],points:[
+const TOWN={name:'Ciudad Brote',bounds:{left:-736,right:736,top:-608,bottom:608},spawn:{x:16,y:32},fountain:{x:16,y:-16},buildings:[
+{id:'lab',x:-320,y:-224,w:192,h:128,label:'LABORATORIO',roof:'#4c86ab',wall:'#e8ecdc'},
+{id:'gym',x:128,y:-224,w:192,h:128,label:'GIMNASIO',roof:'#b04a3e',wall:'#ddd2a8'},
+{id:'clinic',x:-64,y:112,w:160,h:112,label:'CENTRO',roof:'#d9606c',wall:'#f2e7d2'},
+{id:'house1',x:-320,y:96,w:128,h:96,label:'',roof:'#dc8a3c',wall:'#efe0b8'},
+{id:'house2',x:192,y:96,w:128,h:96,label:'',roof:'#4f9a68',wall:'#ece4cc'},
+{id:'academy',x:-624,y:-464,w:240,h:144,label:'ACADEMIA',roof:'#3f80ac',wall:'#e3eadb'},
+{id:'guild',x:320,y:-480,w:240,h:160,label:'CASA DE TIPOS',roof:'#7d60b4',wall:'#ebe1d2'},
+{id:'market',x:-624,y:240,w:208,h:128,label:'MERCADO',roof:'#d27a3a',wall:'#f3e4c4'},
+{id:'school',x:368,y:304,w:240,h:128,label:'DOJO',roof:'#a2403c',wall:'#e8e2c4'},
+{id:'house3',x:-656,y:-96,w:128,h:112,label:'',roof:'#c4594a',wall:'#ede0bd'},
+{id:'house4',x:544,y:-96,w:128,h:112,label:'',roof:'#4a88bc',wall:'#e6e1ca'},
+{id:'house5',x:-320,y:352,w:128,h:112,label:'',roof:'#8d62ab',wall:'#e4e5cf'},
+{id:'house6',x:128,y:352,w:128,h:112,label:'',roof:'#d9a53c',wall:'#efe5c4'}],points:[
 {kind:'professor',x:-224,y:-64,label:'Profesor Ciprés'},
 {kind:'gym',x:224,y:-64,label:'Gimnasio Brote'},
-{kind:'clinic',x:0,y:240,label:'Centro de descanso'},
+{kind:'clinic',x:16,y:240,label:'Centro de descanso'},
 {kind:'academy',x:-496,y:-272,label:'Academia del entrenador'},
 {kind:'guild',x:448,y:-272,label:'Casa de especialidades'},
 {kind:'merchant',x:-520,y:400,label:'Mercado de Brote'},
 {kind:'school',x:496,y:464,label:'Dojo de movimientos'},
 {kind:'ranger',x:0,y:-528,label:'Guardabosques Lía'}]};
 function inTown(x,y){const b=TOWN.bounds;return x>=b.left&&x<b.right&&y>=b.top&&y<b.bottom}
-function townBlocked(x,y){if(!inTown(x,y))return false;if(Math.hypot(x,y+16)<29)return true;return TOWN.buildings.some(b=>x>b.x+3&&x<b.x+b.w-3&&y>b.y+30&&y<b.y+b.h-4)}
+function townBlocked(x,y){if(!inTown(x,y))return false;if(Math.hypot(x-TOWN.fountain.x,y-TOWN.fountain.y)<29)return true;return TOWN.buildings.some(b=>x>b.x+3&&x<b.x+b.w-3&&y>b.y+30&&y<b.y+b.h-4)}
 function relocatePlayer(s){if(tile(Math.floor(s.player.x/32),Math.floor(s.player.y/32),s.seed).block||townBlocked(s.player.x,s.player.y))s.player={...TOWN.spawn,dir:0};return s}
 const HINT_POOLS={};for(const id of Object.keys(DATA).map(Number))for(const type of DATA[id].types)(HINT_POOLS[type]??=[]).push(id);
 const STAGE_LEVEL={};for(const[parent,options]of Object.entries(evolutionData))for(const e of options){if((DATA[parent].generation||1)>(DATA[e.target].generation||1))continue;STAGE_LEVEL[e.target]=Math.max(STAGE_LEVEL[e.target]||1,e.cost?18:e.level);}for(const id of Object.keys(DATA))if(DATA[id].rare)STAGE_LEVEL[id]=45;
@@ -221,6 +227,6 @@ function resourceAt(cx,cy,seed){const r=rng(seedNumber(seed+':loot:'+cx+':'+cy))
 function damage(att,def,power,type,special,r=()=>.5,attForm,defForm){const a=stats(att),d=stats(def),ratio=clamp(a[special?3:1]/d[special?4:2],.55,1.85),stab=DATA[attForm||att.id].types.includes(type)?1.2:1;return Math.max(1,Math.round((power*.25+att.level*.24)*ratio*stab*effectiveness(type,DATA[defForm||def.id].types)*(.92+r()*.16)))}
 function newState(seedText,starter){const seed=seedNumber(seedText);return{version:1,seedText:String(seedText),seed,avatar:'male',player:{...TOWN.spawn,dir:0},team:[makeCreature(starter,5,seedNumber(seedText+':starter'))],active:0,balls:8,berries:3,shards:0,completed:{},collected:{},battles:0,discovered:{pradera:true},distance:0,professorGift:false,researchReward:false,gymWon:false,seenTypes:{}}}
 function upgradeState(s){s.avatar=s.avatar==='female'?'female':'male';s.professorGift=!!s.professorGift;s.researchReward=!!s.researchReward;s.gymWon=!!s.gymWon;s.seenTypes=s.seenTypes&&typeof s.seenTypes==='object'&&!Array.isArray(s.seenTypes)?s.seenTypes:{};s.team.forEach(c=>{api.ensureCreatureProgress?.(c);creatureHealth(c)});return relocatePlayer(s)}
-function validState(s){return s&&s.version===1&&(s.avatar===undefined||['male','female'].includes(s.avatar))&&typeof s.seedText==='string'&&Number.isFinite(s.seed)&&Number.isFinite(s.player?.x)&&Number.isFinite(s.player?.y)&&Array.isArray(s.team)&&s.team.length>0&&s.team.length<2000&&Number.isInteger(s.active)&&s.active>=0&&s.active<s.team.length&&[s.balls,s.berries,s.shards,s.battles].every(v=>Number.isInteger(v)&&v>=0)&&Number.isFinite(s.distance)&&s.distance>=0&&s.completed&&s.collected&&s.discovered&&s.team.every(c=>((c.hp===undefined&&c.maxHP===undefined)||(Number.isFinite(c.hp)&&c.hp>=0&&Number.isInteger(c.maxHP)&&c.maxHP>0&&c.maxHP<=1000000&&c.hp<=c.maxHP))&&DATA[c.id]&&Number.isInteger(c.level)&&c.level>=1&&c.level<=100&&Array.isArray(c.iv)&&c.iv.length===6&&c.iv.every(v=>Number.isInteger(v)&&v>=0&&v<=31)&&Array.isArray(c.ev)&&c.ev.length===6&&c.ev.every(v=>Number.isInteger(v)&&v>=0&&v<=252)&&c.ev.reduce((a,b)=>a+b,0)<=510&&typeof c.uid==='string'&&Number.isFinite(c.xp)&&c.xp>=0&&Number.isInteger(c.training)&&c.training>=0&&Number.isInteger(c.wins)&&c.wins>=0&&c.nature&&typeof c.nature.name==='string'&&c.nature.name.length<40&&Number.isInteger(c.nature.up)&&Number.isInteger(c.nature.down)&&c.nature.up>=-1&&c.nature.up<=5&&c.nature.down>=-1&&c.nature.down<=5&&c.nature.up!==0&&c.nature.down!==0&&((c.nature.up===-1&&c.nature.down===-1)||(c.nature.up>0&&c.nature.down>0&&c.nature.up!==c.nature.down)))}
-const api={REGIONS,regionAt,regionSpecies,speciesRegions,KANTO_IDS,COMBAT_BASE,combatBase,evolutionOptions,isFinal,defaultUltimate,MOVE_DATA,KITS,STAGE_LEVEL,TOWN,inTown,townBlocked,relocatePlayer,HINT_POOLS,habitatSpecies,gymEncounter,claimGymReward,DATA,TYPE,STAT_NAMES,clamp,lerp,hash,seedNumber,rng,noise,makeCreature,stats,maxHP,creatureHealth,setCreatureHP,healTeam,train,xpNext,award,evolve,evolutions,effectiveness,moves,tile,encounterAt,resourceAt,damage,MOVE_RULES,newState,upgradeState,validState};return api;
+function validState(s){return s&&s.version===1&&(s.avatar===undefined||['male','female'].includes(s.avatar))&&typeof s.seedText==='string'&&Number.isFinite(s.seed)&&Number.isFinite(s.player?.x)&&Number.isFinite(s.player?.y)&&Array.isArray(s.team)&&s.team.length>0&&s.team.length<2000&&Number.isInteger(s.active)&&s.active>=0&&s.active<s.team.length&&[s.balls,s.berries,s.shards,s.battles].every(v=>Number.isInteger(v)&&v>=0)&&Number.isFinite(s.distance)&&s.distance>=0&&s.completed&&s.collected&&s.discovered&&s.team.every(c=>((c.hp===undefined&&c.maxHP===undefined)||(Number.isFinite(c.hp)&&c.hp>=0&&Number.isInteger(c.maxHP)&&c.maxHP>0&&c.maxHP<=1000000&&c.hp<=c.maxHP))&&DATA[c.id]&&Number.isInteger(c.level)&&c.level>=1&&c.level<=100&&Array.isArray(c.iv)&&c.iv.length===6&&c.iv.every(v=>Number.isInteger(v)&&v>=0&&v<=31)&&Array.isArray(c.ev)&&c.ev.length===6&&c.ev.every(v=>Number.isInteger(v)&&v>=0&&v<=999)&&c.ev.reduce((a,b)=>a+b,0)<=1000&&typeof c.uid==='string'&&Number.isFinite(c.xp)&&c.xp>=0&&Number.isInteger(c.training)&&c.training>=0&&Number.isInteger(c.wins)&&c.wins>=0&&c.nature&&typeof c.nature.name==='string'&&c.nature.name.length<40&&Number.isInteger(c.nature.up)&&Number.isInteger(c.nature.down)&&c.nature.up>=-1&&c.nature.up<=5&&c.nature.down>=-1&&c.nature.down<=5&&c.nature.up!==0&&c.nature.down!==0&&((c.nature.up===-1&&c.nature.down===-1)||(c.nature.up>0&&c.nature.down>0&&c.nature.up!==c.nature.down)))}
+const api={REGIONS,regionAt,regionSpecies,speciesRegions,KANTO_IDS,COMBAT_BASE,combatBase,evolutionOptions,isFinal,defaultUltimate,MOVE_DATA,KITS,STAGE_LEVEL,TOWN,inTown,townBlocked,relocatePlayer,HINT_POOLS,habitatSpecies,gymEncounter,claimGymReward,DATA,TYPE,STAT_NAMES,clamp,lerp,hash,seedNumber,rng,noise,makeCreature,stats,maxHP,creatureHealth,setCreatureHP,healTeam,train,trainedPoints,trainBudget,trainRoom,xpNext,award,evolve,evolutions,effectiveness,moves,tile,encounterAt,resourceAt,damage,MOVE_RULES,newState,upgradeState,validState};return api;
 });
