@@ -189,7 +189,7 @@ F.moves=function(c){if(!c.progression){c={...c};ensureCreature(c)}const bonus=po
  energyCost:m.energyCost*(1-M.focuscast[0]*R('focuscast')),delay:m.delay*(1-M.readiness[0]*R('readiness')),
  cooldown:Number((m.cooldown*(1-M.mastery[0]*R('mastery')-M.rhythm[0]*R('rhythm')-M.cadence[0]*R('cadence')-M.tempo[0]*R('tempo'))).toFixed(2)),
  accuracy:m.accuracy?Math.min(100,m.accuracy+M.precision[0]*R('precision')):m.accuracy,
- bonusCrit:M.precision[1]*R('precision')+M.surehand[0]*R('surehand'),approachDistance:210*bonus.approach
+ bonusCrit:M.precision[1]*R('precision')+M.surehand[0]*R('surehand'),approachDistance:130*bonus.approach
  }
 })};
 F.newState=(...args)=>ensureState(rawNew(...args));F.upgradeState=s=>ensureState(rawUpgrade(s));F.evolve=function(c,shards,target){ensureCreature(c);if(!rawEvolve(c,shards,target))return false;ensureCreature(c);return true};

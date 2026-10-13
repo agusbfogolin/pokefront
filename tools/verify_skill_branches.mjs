@@ -33,7 +33,7 @@ function battle(s){const c=s.team[0],b=C.create(c,{creature:F.makeCreature(19,60
 const walking=fresh(),control=battle(clone(walking));buyThrough(walking,'pokemon',{index:0},'fleetfoot');const fast=battle(walking);C.step(fast,1/60,{right:true},false);C.step(control,1/60,{right:true},false);assert.ok(fast.fighters[0].x>control.fighters[0].x);
 const relay=fresh();buyThrough(relay,'trainer',null,'relayguard',6);const rb=battle(relay);assert.ok(C.switchPokemon(rb,1));assert.ok(Math.abs(rb.fighters[0].iframe-1.04)<1e-9,'0,04 s per rank on top of 0,8 s');
 const practicing=fresh();buyThrough(practicing,'trainer',null,'mentorship',6);const before=practicing.team[0].progression.moves.ember.xp,pb=battle(practicing);pb.roster[0].usedMoves={ember:1};pb.result='win';F.rewardBattle(practicing,pb);assert.equal(practicing.team[0].progression.moves.ember.xp-before,Math.round(25*1.15));
-const pursuer=fresh();buyThrough(pursuer,'pokemon',{index:0},'pursuer',5);const pursuit=battle(pursuer),pa=pursuit.fighters[0];pa.x=0;pursuit.fighters[1].x=400;assert.ok(C.action(pursuit,0,'m1'));assert.equal(pa.approach.remaining,252);
+const pursuer=fresh();buyThrough(pursuer,'pokemon',{index:0},'pursuer',5);const pursuit=battle(pursuer),pa=pursuit.fighters[0];pa.x=0;pursuit.fighters[1].x=400;assert.ok(C.action(pursuit,0,'m1'));assert.equal(pa.approach.remaining,156);
 console.log('PASS live combat: purchased health keeps PS, walking speed, switch protection, move practice XP and longer melee approach');
 
 const status=fresh(151),sc=status.team[0];for(const key of ['will-o-wisp','rain-dance']){assert.ok(r.SPECIES_LEARNSETS[151].includes(key));if(!sc.progression.learned.includes(key))sc.progression.learned.push(key);sc.progression.moves[key]={xp:1e5,nodes:{}};}

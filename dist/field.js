@@ -8,6 +8,7 @@ const FIELD={
  strength:{badge:'dunes',description:'Empuja una roca pesada una casilla hacia un espacio libre.'},
  flash:{badge:'campina',description:'Ilumina la cueva hasta que salgas de ella.'},
  'rock-smash':{badge:'marsh',description:'Rompe rocas agrietadas y conserva el paso abierto.'},
+ headbutt:{badge:'highlands',description:'Sacude los árboles marcados. Algunos esconden Pokémon que no aparecen en ningún otro lugar.'},
  waterfall:{badge:'crater',description:'Sube o baja una cascada mientras usas Surf.'},
  dig:{badge:null,description:'Regresa desde una cueva a su entrada exterior.'},
  teleport:{badge:null,description:'Desde el exterior, vuelve al último centro donde descansaste.'}
@@ -21,6 +22,7 @@ function user(s,key){return[s.team[s.active],...s.team.filter((_,i)=>i!==s.activ
 function access(s,key){const move=FIELD[key];if(!move)return{ok:false,reason:'Técnica desconocida'};if(move.badge&&!(F.hasFieldBadge?F.hasFieldBadge(s,move.badge):s.badges[move.badge]))return{ok:false,reason:'Medalla '+F.CITY[move.badge].badge+' · '+F.CITY[move.badge].name};const c=user(s,key);return c?{ok:true,user:c,reason:F.DATA[c.id].name}:{ok:false,reason:'Necesitas un Pokémon compatible en tu equipo'}}
 function baseTile(id,x,y,seed){const raw=F.mapTile(id,x,y,seed),t={...raw};if(t.boundary||t.landmark)return t;
  if(['tree','pine','palm'].includes(t.obstacle)&&t.detail>.7)t.fieldMove='cut';
+ else if(['tree','pine','palm'].includes(t.obstacle)&&t.detail>.42&&t.detail<=.5)t.fieldMove='headbutt';
  else if(['boulder','basalt'].includes(t.obstacle))t.fieldMove=F.hash(x,y,F.mapSeed(id,seed)+219)>.5?'strength':'rock-smash';
  return t;
 }
@@ -57,7 +59,7 @@ function canUse(s,key,options={}){
  if(key==='dig')return m.kind==='cave'?allowed:{ok:false,reason:'Excavar se usa dentro de una cueva'};
  if(key==='flash')return m.kind!=='cave'?{ok:false,reason:'Destello se usa dentro de una cueva'}:f.flash===s.mapId?{ok:false,reason:'La cueva ya está iluminada'}:allowed;
  if(key==='surf'&&f.surfing)return{ok:false,reason:'Ya estás usando Surf'};
- const p=target(s,key,options.target);if(!p)return{ok:false,reason:{cut:'Acércate a un árbol pequeño',surf:'Acércate a la orilla',strength:'Acércate a una roca pesada','rock-smash':'Acércate a una roca agrietada',waterfall:'Acércate a una cascada'}[key]};
+ const p=target(s,key,options.target);if(!p)return{ok:false,reason:{cut:'Acércate a un árbol pequeño',surf:'Acércate a la orilla',strength:'Acércate a una roca pesada','rock-smash':'Acércate a una roca agrietada',headbutt:'Acércate a un árbol marcado',waterfall:'Acércate a una cascada'}[key]};
  if(key==='strength'||key==='waterfall'){
   const dx=p.tx-Math.floor(s.player.x/32),dy=p.ty-Math.floor(s.player.y/32);
   if(Math.abs(dx)+Math.abs(dy)!==1)return{ok:false,reason:'Colócate junto al obstáculo, a una casilla'};

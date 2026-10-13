@@ -640,3 +640,88 @@ img{image-rendering:pixelated}
 #runBtn[aria-pressed="true"]{background:linear-gradient(180deg,#ffe27a,#ffc21f);color:#2b1d00;box-shadow:var(--g-bevel),0 5px 0 #8a5a00,0 7px 0 #04090b}
 #runBtn[aria-pressed="true"] kbd{background:#0002;color:#2b1d00}
 body.inbattle #runBtn{display:none}
+
+/* ---------- Campaña personalizada ---------- */
+#welcomeCustom{width:100%}
+.pace-custom{margin:8px 0;padding:12px 14px;border:2px solid #ffffff33;border-radius:8px;background:var(--g-panel3);color:var(--ink);text-align:left}
+.pace-custom legend{padding:0 6px;font-family:var(--g-body);font-weight:900;font-size:11px;letter-spacing:2px;color:var(--g-gold)}
+.pace-gens{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 14px}
+.welcome-world .pace-custom label,.pace-custom label{display:flex;align-items:center;gap:8px;font-family:var(--g-body);font-weight:700;font-size:12px;letter-spacing:0;color:var(--ink)}
+.welcome-world .pace-custom input[type=checkbox],.pace-custom input[type=checkbox]{flex:none;width:20px;min-width:20px;height:20px;min-height:20px;padding:0;accent-color:var(--g-grass)}
+.pace-need{margin-top:12px}
+.welcome-world .pace-custom select,.pace-custom select{flex:none;width:auto;min-width:96px;padding:7px 9px;border:2px solid var(--g-line);border-radius:6px;background:var(--g-panel2);color:var(--ink);font-size:12px;min-height:36px}
+.pace-summary{display:block;margin-top:12px;font-size:11px;font-weight:700;line-height:1.6;color:#bccdbb}
+.pace-custom-box{margin:10px 0 14px;padding:10px 12px;border:2px dashed #ffffff33;border-radius:8px}
+.pace-custom-box summary{cursor:pointer;font-weight:900;font-size:12px;color:var(--g-gold)}
+.pace-custom-box>button{margin-top:6px}
+@media(max-width:600px){.pace-gens{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* ---------- Revisión UI 3: cierre de ventanas, scroll único, menú móvil ---------- */
+/* La cruz queda fija en la esquina mientras se desplaza el contenido y nunca tapa la barra de atajos. */
+dialog>.modalclose{position:sticky;top:0;float:right;margin:-14px -14px 8px 30px;padding:0;width:38px;height:38px;
+  display:block;font-size:0!important;color:transparent;overflow:hidden;border:2px solid #04090b;border-radius:9px}
+dialog>.modalclose::before,dialog>.modalclose::after{content:'';position:absolute;left:50%;top:50%;width:20px;height:4px;border-radius:2px;
+  background:#fff4dc;box-shadow:0 2px 0 #5a130e;transform:translate(-50%,-50%) rotate(45deg)}
+dialog>.modalclose::after{transform:translate(-50%,-50%) rotate(-45deg)}
+dialog>.modalclose .keyboard-badge{display:none}
+dialog>.modalclose:focus-visible{outline:3px solid var(--g-gold);outline-offset:2px}
+dialog>.modalclose:active{transform:translateY(2px)}
+dialog>.modalclose.hidden{display:none!important}
+.dialog-keys{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Una sola barra de desplazamiento por ventana */
+.startergrid,.all-starters .startergrid{max-height:none;overflow:visible}
+/* Menú de aventura: las columnas no desbordan en pantallas angostas */
+.adventure-menu-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.adventure-menu-card{min-width:0}
+.adventure-menu-card>span{min-width:0}
+.adventure-menu-card b{overflow-wrap:anywhere}
+@media(max-width:420px){
+  .adventure-menu-card{flex-direction:column;align-items:flex-start;gap:8px;padding:12px}
+  .adventure-menu-card .keyboard-badge{position:absolute;top:10px;right:10px}
+  dialog>.modalclose{margin:-12px -8px 6px 10px}
+  .dialog-keys{white-space:normal}
+}
+
+/* ---------- Nueva partida: modo de juego y duración ---------- */
+.welcome-setup-note{margin:14px 0 4px;padding:12px 0 0;border-top:2px dashed #ffffff33;color:#cfe3d4!important;font-size:12px!important;font-weight:700}
+.welcome-setup-note b{color:var(--g-gold)}
+.setup-dialog{width:min(980px,calc(100% - 24px));max-height:calc(100dvh - 24px);overflow:auto}
+.setup-lead{max-width:62ch;margin-top:0}
+.setup-step{margin-top:20px}
+.setup-step h3{display:flex;align-items:center;gap:10px;margin:0 0 12px}
+.setup-step h3 span{display:grid;place-items:center;width:24px;height:24px;border-radius:6px;background:var(--g-gold);color:#251a00;text-shadow:none;font-size:9px}
+.setup-grid{display:grid;gap:10px}
+.setup-modes{grid-template-columns:repeat(5,minmax(0,1fr))}
+.setup-paces{grid-template-columns:repeat(5,minmax(0,1fr))}
+.setup-card{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0;padding:14px 12px 13px;text-align:left;border-radius:10px;
+  color:var(--ink);background:linear-gradient(180deg,#1f3d44,#142a30);border:2px solid #2e4a46;box-shadow:0 4px 0 #04090b;transition:transform .12s,border-color .12s,background .12s}
+.setup-card:hover{transform:translateY(-2px);border-color:#5b8c7c}
+.setup-card>i{display:grid;place-items:center;width:38px;height:38px;border-radius:9px;background:#08151a;box-shadow:inset 0 0 0 2px #2e4a46;font-style:normal;font-size:19px;color:var(--g-gold)}
+.setup-card b{display:block;font-family:var(--g-px);font-size:9px;line-height:1.5;color:var(--ink);text-shadow:1px 1px 0 #000;overflow-wrap:anywhere}
+.setup-card small{display:block;margin-top:6px;font-size:11px;font-weight:700;line-height:1.4;color:var(--muted)}
+.setup-card.selected{border-color:var(--g-gold);background:linear-gradient(180deg,#2c5a4f,#1b3d38);box-shadow:0 4px 0 #04090b,0 0 0 2px #04090b,0 0 18px #ffd24a33}
+.setup-card.selected::after{content:'✓';position:absolute;top:9px;right:10px;width:20px;height:20px;display:grid;place-items:center;border-radius:50%;background:var(--g-gold);color:#251a00;font-weight:900;font-size:12px}
+.setup-card .keyboard-badge{display:none}
+.setup-mode[data-mode="nuzlocke"]>i{color:var(--g-red)}
+.setup-mode[data-mode="relaxed"]>i{color:var(--g-grass)}
+.setup-mode[data-mode="free"]>i{color:var(--g-cyan)}
+.setup-mode[data-mode="challenge"]>i{color:#ff9b4a}
+.setup-rules{margin-top:12px;padding:12px 16px;border-radius:10px;background:#0b1b20;border:2px solid #2e4a46}
+.setup-rules p{margin:0 0 6px}
+.setup-rules ul{margin:0;padding-left:18px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 18px;font-size:12px;font-weight:700;color:#bccdbb}
+.setup-seedrow{display:flex;gap:10px}
+.setup-seedrow input{flex:1;min-width:0;padding:10px 12px;background:#08151a;color:var(--ink);border:2px solid #3d6a5c;border-radius:8px;font-weight:700;font-size:14px}
+.setup-seed small{display:block;margin-top:6px;color:var(--muted);font-weight:700}
+.setup-summary{margin:18px 0 0;padding:10px 14px;border-radius:8px;background:#04090b88;color:#e4ecd9!important;font-weight:700}
+.setup-summary b{color:var(--g-gold)}
+.setup-actions{justify-content:flex-start;flex-wrap:wrap}
+.setup-actions .primary{font-size:9px}
+#setupDialog #welcomeCustom{margin-top:12px}
+@media(max-width:900px){.setup-modes,.setup-paces{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:560px){
+  .setup-modes,.setup-paces{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .setup-rules ul{grid-template-columns:1fr}
+  .setup-card{padding:12px 10px}
+  .setup-actions button{flex:1}
+}
+.setup-pace>i{font-family:var(--g-px);font-size:13px}

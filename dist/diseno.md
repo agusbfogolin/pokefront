@@ -37,6 +37,22 @@ Las rutas normales y la pesca no generan legendarios. Invocar requiere estar jun
 
 Son historias y rituales originales de Frontera; los santuarios usan los mapas actuales, sin reproducir los eventos de los juegos oficiales. Ejemplos: Articuno en «El canto del glaciar», Zapdos en «La central silenciosa», Mewtwo en «El laboratorio sellado», Celebi en «El bosque fuera del tiempo» y Giratina en «El espejo del otro mundo».
 
+## Eventos únicos, Ultraentes, Paradoja e iniciales
+
+El motor de santuarios ahora cubre **152 eventos**: 94 leyendas y míticos, 10 Ultraentes (Alola), 20 Paradoja (Paldea) y los 28 iniciales. Los Ultraentes y los Paradoja necesitan las medallas locales indicadas (5–9) más dos pistas y una prueba. Los iniciales que **no elegiste** vuelven como evento cuando reúnes la mitad de las medallas (41 de 81); el que elegiste nunca aparece. Ninguno de ellos (ni Naganadel ni las familias evolutivas de los iniciales) aparece ya en estado salvaje: la Pokédex indica «Solo por evento».
+
+**Fallos y reaparición.** Derrotar al Pokémon sin capturarlo, escapar, perder o cerrar el juego en pleno combate cuenta como fallo. Las leyendas tienen **una segunda oportunidad** (salir de la cueva y volver a entrar); si falla otra vez se pierden para siempre y el diario las marca como perdidas. Para el resto de los eventos, cada fallo **reduce a la mitad** la probabilidad de reaparecer (100 → 50 → 25 → 12,5 → 6,25 %, mínimo); nunca se pierden del todo.
+
+**Escondites con técnicas de campo.** 17 Pokémon exclusivos (Shuckle, Carbink, Dwebble, Glimmet, Kangaskhan, Nosepass, Stonjourner, Heracross, Munchlax, Komala, Farfetch'd, Scyther, Dunsparce, Sableye, Gible, Feebas y Dratini) salen de una fracción determinista de casillas al usar Golpe Roca, Fuerza, **Golpe Cabeza** (nueva técnica, medalla de Altos, árboles con marca ámbar), Corte, Destello, Surf o Cascada, siempre en su región. Cada casilla dispara una sola vez; la captura cierra la especie para siempre.
+
+**Mini-eventos canónicos.** 13 historias (Beedrill, Chansey, Tentacruel, Gyarados rojo, Zubat, Poochyena, Combee, Starly, Venipede, Fletchling, Wimpod, Wooloo y Tandemaus) se arman con 10 % cada vez que entras en su ruta (con al menos una medalla local). Se disparan al entrar, al pisar hierba alta, al pescar, al usar Surf, Destello o Golpe Cabeza. Son oleadas de equipos de entrenador (no capturables, sin curación entre oleadas) y un jefe de IV altos con captura a 15–20 % de PS que **no admite Master Ball**. Es la única forma de conseguir ese ejemplar. Perder, escapar o derrotar al jefe sin capturarlo divide por dos la probabilidad de que vuelva a aparecer.
+
+## Campaña corta (3 medallas)
+
+Al comenzar, el menú de bienvenida ofrece **Campaña corta · 3 medallas por región** (opción por defecto) o la campaña completa de 9. En la corta, cualquiera de las tres medallas locales completa la región y abre la frontera siguiente; los demás gimnasios siguen disponibles como extra. Los requisitos de leyendas y eventos escalan con el ritmo (9/7/5/3 medallas locales pasan a 3/3/2/1) y la mitad de las medallas para los iniciales baja de 41 a 14. Las etapas del rival Ivo llegan con 1, 2 y 3 medallas. Se puede cambiar de ritmo en mitad de la partida sin cerrar fronteras ya abiertas. Las partidas antiguas siguen como campaña completa. `node tools/verify_pace.mjs` lo comprueba.
+
+**Campaña personalizada.** La tercera opción de «Duración» permite elegir **qué regiones** forman la aventura (la de tu inicial siempre cuenta) y **cuántos gimnasios** (1–9) exige cada una. Al completar una región se abren sus vecinas *dentro de tu selección*, aunque no sean contiguas en el mapa (se viaja desde el atlas o la ciudad). Las regiones fuera de la campaña quedan cerradas y marcadas «Fuera de tu campaña». Los requisitos de leyendas y la mitad de medallas de los iniciales escalan con la selección. Se puede cambiar o ajustar en mitad de la partida desde el atlas («Personalizar campaña») sin cerrar fronteras ya abiertas.
+
 ## Encuentros camuflados
 
 No se muestran sprites de los Pokémon salvajes en el mundo. Se muestran rastros pequeños, de menor opacidad a distancia, que se resaltan al acercarse. Su forma comunica el tipo; la identidad aparece solamente al comenzar el combate. El diálogo de investigación conserva el tipo y el hábitat, con un retrato desconocido. Los equipos de los entrenadores se revelan un Pokémon a la vez al entrar en la arena. El compañero del jugador sí permanece visible.

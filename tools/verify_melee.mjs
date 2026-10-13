@@ -12,18 +12,19 @@ function creature(key,seed=1){const c=F.makeCreature(4,30,seed);c.progression={x
 function fight(key='scratch',gap=300,team){const c=team?.[0]||creature(key),b=C.create(c,{kind:'wild',creature:F.makeCreature(19,30,9)},4,team||[c]);b.intro=0;b.r=()=>0;const[a,d]=b.fighters;a.x=0;a.z=0;d.x=gap;d.z=0;for(const f of b.fighters)f.cd.basic=1000;return b;}
 function run(b,seconds=.8,input={}){for(let i=0;i<Math.round(seconds*60);i++)C.step(b,1/60,input,false);}
 for(const key of ['scratch','tackle','bite','aqua-jet','quick-attack']){
- const b=fight(key),[a,d]=b.fighters,m=C.moves(a)[0],hp=d.hp;
+ const b=fight(key,200),[a,d]=b.fighters,m=C.moves(a)[0],hp=d.hp;
  assert.ok(['melee','lunge'].includes(m.kind),key);assert.ok(C.action(b,0,'m0'));assert.ok(a.approach,key+' approaches');
  close(a.stamina,100-m.cost);close(a.energy,100-m.energyCost);assert.equal(a.iframe,0);C.step(b,0,{},false);assert.ok(a.approach,'HUD refresh cannot cancel attack');close(a.x,0);
  C.step(b,1/60,{},false);assert.ok(a.x>0&&a.y>0,key+' visible leap');assert.ok(a.x<40,'continuous motion');
- run(b);assert.ok(a.x>100&&a.x<=210.01,key+' bounded dash');assert.ok(d.hp<hp,key+' hits from 300');assert.equal(a.approach,null);assert.equal(a.y,0);
+ run(b);assert.ok(a.x>60&&a.x<=130.01,key+' bounded dash');assert.ok(d.hp<hp,key+' hits from 200');assert.equal(a.approach,null);assert.equal(a.y,0);
  assert.ok(a.cd.m0>0);assert.equal(C.action(b,0,'m0'),false,'cooldown retained');
 }
-const distant=fight('scratch',500),distantHP=distant.fighters[1].hp;C.action(distant,0,'m0');run(distant);assert.ok(distant.fighters[0].x<=210.01);assert.equal(distant.fighters[1].hp,distantHP,'no remote hit');
-const sidestep=fight();C.action(sidestep,0,'m0');run(sidestep,.15);sidestep.fighters[1].z=280;const sideHP=sidestep.fighters[1].hp;run(sidestep);close(sidestep.fighters[0].z,0);assert.equal(sidestep.fighters[1].hp,sideHP,'locked trajectory can miss');
-for(const behind of [false,true]){const b=fight(),[a,d]=b.fighters,hp=d.hp;C.action(b,0,'m0');run(b,.32);d.x=a.x+(behind?-130:45);d.z=behind?0:150;run(b,.15);assert.equal(d.hp<hp,!behind,'wide frontal arc, no backward hit');}
-const dodged=fight(),dodgeHP=dodged.fighters[1].hp;C.action(dodged,0,'m0');run(dodged,.15);assert.ok(C.action(dodged,1,'dash',{x:0,z:1}));run(dodged,.35);assert.equal(dodged.fighters[1].hp,dodgeHP,'dodge invulnerability retained');
-console.log('PASS contact moves: smooth bounded leap, wider frontal arc, real contact, misses, dodge, costs/cooldowns and no new invulnerability');
+const distant=fight('scratch',500),distantHP=distant.fighters[1].hp;C.action(distant,0,'m0');run(distant);assert.ok(distant.fighters[0].x<=130.01);assert.equal(distant.fighters[1].hp,distantHP,'no remote hit');
+const sidestep=fight('scratch',200);C.action(sidestep,0,'m0');run(sidestep,.15);sidestep.fighters[1].z=280;const sideHP=sidestep.fighters[1].hp;run(sidestep);close(sidestep.fighters[0].z,0);assert.equal(sidestep.fighters[1].hp,sideHP,'locked trajectory can miss');
+for(const behind of [false,true]){const b=fight('scratch',200),[a,d]=b.fighters,hp=d.hp;C.action(b,0,'m0');run(b,.32);d.x=a.x+(behind?-60:60);d.z=behind?0:40;run(b,.15);assert.equal(d.hp<hp,!behind,'narrow frontal arc, no backward hit');}
+for(const z of [150,100]){const b=fight('scratch',200),[a,d]=b.fighters,hp=d.hp;C.action(b,0,'m0');run(b,.32);d.x=a.x+60;d.z=z;run(b,.15);assert.equal(d.hp,hp,'side target outside the narrow arc');}
+const dodged=fight('scratch',200),dodgeHP=dodged.fighters[1].hp;C.action(dodged,0,'m0');run(dodged,.15);assert.ok(C.action(dodged,1,'dash',{x:0,z:1}));run(dodged,.35);assert.equal(dodged.fighters[1].hp,dodgeHP,'dodge invulnerability retained');
+console.log('PASS contact moves: smooth bounded leap, narrower frontal arc, real contact, misses, dodge, costs/cooldowns and no new invulnerability');
 
 for(const input of [{right:true},{left:true},{up:true},{down:true},{right:true,up:true}]){
  const b=fight('scratch',500),a=b.fighters[0];a.x=-200;a.energy=40;a.stamina=10;

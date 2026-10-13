@@ -16,6 +16,15 @@ obstacle(c,x,y,t){
   r(P[0],-6,-15,13,2);r('#1e3a2e55',-7,-13,15,2);
   r('#ffffff',-1,-39,1,1);
   return}
+ if(t.fieldMove==='headbutt'){
+  // árbol robusto con una marca ámbar en el tronco: se sacude con Golpe Cabeza
+  const P=['#2b5a3e','#3f8049','#6aa356','#a3cf78'];
+  r('#4a3626',-4,-16,9,16);r('#6b4f35',-4,-16,6,16);r('#8d6a44',-4,-16,2,14);r('#2f2118',-6,-1,13,1);
+  r('#e0a23a',-3,-11,6,4);r('#f4cf72',-2,-10,4,2);r('#7a4b17',-3,-8,6,1);
+  const B=[[0,-27,14,11],[-9,-22,8,7],[9,-22,8,7],[0,-35,9,8]];
+  for(const b of B)disc(P[0],b[0],b[1]+1,b[2]+1,b[3]+1);for(const b of B)disc(P[1],b[0]-1,b[1],b[2],b[3]);for(const b of B)if(b[2]>6)disc(P[2],b[0]-3,b[1]-2,b[2]-4,b[3]-3);disc(P[3],-4,-33,3,2);
+  r('#1e3a2e55',-8,-14,17,2);
+  return}
  if(t.fieldMove==='strength'){
   // roca grande y redondeada con marcas de empuje
   const P=['#3f5a5c','#6f8e8e','#9fbdb8','#d6ebe2'];

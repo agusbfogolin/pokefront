@@ -21,7 +21,7 @@ window.createKeyboardUI=function(api){
  }
  function prepare(d){const area=$('gameArea');if(d.id!=='welcomeDialog'&&document.fullscreenElement===area&&!area.contains?.(d)){portals.set(d,{parent:d.parentNode,next:d.nextSibling});area.append(d);}}
  function open(d){observer?.disconnect();activeDialog=d;lastFocus=null;lastKey='';lastIndex=0;
-  if(!d.querySelector?.('.dialog-keys')){const hint=document.createElement('p');hint.className='dialog-keys';hint.textContent=d.id==='learningDialog'?'Flechas / WASD: secuencia · Tab: opciones · Enter: confirmar · Esc: volver':'↑ ↓ ← → elegir · Enter / Espacio confirmar · Tab campos · 1–9 atajos · Esc volver';d.prepend?.(hint);}
+  if(!d.querySelector?.('.dialog-keys')){const hint=document.createElement('p');hint.className='dialog-keys';hint.textContent=d.id==='learningDialog'?'Flechas / WASD: secuencia · Tab: opciones · Enter: confirmar · Esc: volver':'↑ ↓ ← → elegir · Enter / Espacio confirmar · Tab campos · 1–9 atajos · Esc volver';const x=d.querySelector?.('.modalclose');if(x&&x.parentElement===d&&d.insertBefore)d.insertBefore(hint,x.nextSibling);else d.prepend?.(hint);}
   sync();const list=controls(d);if(d.id==='learningDialog'){d.tabIndex=-1;d.focus({preventScroll:true});}else focus(primary(d,list));
   if(window.MutationObserver){observer=new MutationObserver(sync);observer.observe(d,{childList:true,subtree:true,attributes:true,attributeFilter:['disabled','hidden','class','open']});}
  }

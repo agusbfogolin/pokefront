@@ -19,6 +19,22 @@ Las rutas normales y la pesca no generan legendarios. Invocar requiere estar jun
 
 Son historias y rituales originales de Frontera; los santuarios usan los mapas actuales, sin reproducir los eventos de los juegos oficiales. Ejemplos: Articuno en «El canto del glaciar», Zapdos en «La central silenciosa», Mewtwo en «El laboratorio sellado», Celebi en «El bosque fuera del tiempo» y Giratina en «El espejo del otro mundo».
 
+## Eventos únicos, Ultraentes, Paradoja e iniciales
+
+El motor de santuarios ahora cubre **152 eventos**: 94 leyendas y míticos, 10 Ultraentes (Alola), 20 Paradoja (Paldea) y los 28 iniciales. Los Ultraentes y los Paradoja necesitan las medallas locales indicadas (5–9) más dos pistas y una prueba. Los iniciales que **no elegiste** vuelven como evento cuando reúnes la mitad de las medallas (41 de 81); el que elegiste nunca aparece. Ninguno de ellos (ni Naganadel ni las familias evolutivas de los iniciales) aparece ya en estado salvaje: la Pokédex indica «Solo por evento».
+
+**Fallos y reaparición.** Derrotar al Pokémon sin capturarlo, escapar, perder o cerrar el juego en pleno combate cuenta como fallo. Las leyendas tienen **una segunda oportunidad** (salir de la cueva y volver a entrar); si falla otra vez se pierden para siempre y el diario las marca como perdidas. Para el resto de los eventos, cada fallo **reduce a la mitad** la probabilidad de reaparecer (100 → 50 → 25 → 12,5 → 6,25 %, mínimo); nunca se pierden del todo.
+
+**Escondites con técnicas de campo.** 17 Pokémon exclusivos (Shuckle, Carbink, Dwebble, Glimmet, Kangaskhan, Nosepass, Stonjourner, Heracross, Munchlax, Komala, Farfetch'd, Scyther, Dunsparce, Sableye, Gible, Feebas y Dratini) salen de una fracción determinista de casillas al usar Golpe Roca, Fuerza, **Golpe Cabeza** (nueva técnica, medalla de Altos, árboles con marca ámbar), Corte, Destello, Surf o Cascada, siempre en su región. Cada casilla dispara una sola vez; la captura cierra la especie para siempre.
+
+**Mini-eventos canónicos.** 13 historias (Beedrill, Chansey, Tentacruel, Gyarados rojo, Zubat, Poochyena, Combee, Starly, Venipede, Fletchling, Wimpod, Wooloo y Tandemaus) se arman con 10 % cada vez que entras en su ruta (con al menos una medalla local). Se disparan al entrar, al pisar hierba alta, al pescar, al usar Surf, Destello o Golpe Cabeza. Son oleadas de equipos de entrenador (no capturables, sin curación entre oleadas) y un jefe de IV altos con captura a 15–20 % de PS que **no admite Master Ball**. Es la única forma de conseguir ese ejemplar. Perder, escapar o derrotar al jefe sin capturarlo divide por dos la probabilidad de que vuelva a aparecer.
+
+## Campaña corta (3 medallas)
+
+Al comenzar, el menú de bienvenida ofrece **Campaña corta · 3 medallas por región** (opción por defecto) o la campaña completa de 9. En la corta, cualquiera de las tres medallas locales completa la región y abre la frontera siguiente; los demás gimnasios siguen disponibles como extra. Los requisitos de leyendas y eventos escalan con el ritmo (9/7/5/3 medallas locales pasan a 3/3/2/1) y la mitad de las medallas para los iniciales baja de 41 a 14. Las etapas del rival Ivo llegan con 1, 2 y 3 medallas. Se puede cambiar de ritmo en mitad de la partida sin cerrar fronteras ya abiertas. Las partidas antiguas siguen como campaña completa. `node tools/verify_pace.mjs` lo comprueba.
+
+**Campaña personalizada.** La tercera opción de «Duración» permite elegir **qué regiones** forman la aventura (la de tu inicial siempre cuenta) y **cuántos gimnasios** (1–9) exige cada una. Al completar una región se abren sus vecinas *dentro de tu selección*, aunque no sean contiguas en el mapa (se viaja desde el atlas o la ciudad). Las regiones fuera de la campaña quedan cerradas y marcadas «Fuera de tu campaña». Los requisitos de leyendas y la mitad de medallas de los iniciales escalan con la selección. Se puede cambiar o ajustar en mitad de la partida desde el atlas («Personalizar campaña») sin cerrar fronteras ya abiertas.
+
 ## Movimientos y aprendizaje
 
 El catálogo incluye **970 movimientos y variantes oficiales registradas**: 919 de la serie principal en PokéAPI, 18 oscuros de Colosseum/XD y 33 Gigamax obtenidos de Pokémon Showdown. Se conservan nueve modos de arena heredados (979 definiciones de ejecución). Todos tienen tipos, clases de daño y metadatos. Hay hasta cuatro técnicas normales por Pokémon, libremente combinables entre sus movimientos aprendidos. Las 568 especies terminales (incluidas las que no evolucionan) tienen un quinto espacio, con una definitiva de uso único por Pokémon y batalla; cambiar de compañero o Transformar no recupera el uso. Se restablece en una batalla nueva. La definitiva puede usar una técnica aprendida con potencia o duración aumentada. Ditto repite Transformación porque su catálogo nativo contiene una sola técnica.
@@ -120,6 +136,9 @@ Los pasos abiertos, las rocas movidas y el último centro se guardan. La partida
 - `dist/economy.js`: 83 objetos, compras, ventas, dinero, premios, equipamiento, consumo y evolución por objetos.
 - `dist/adventure-ui.js`: mochila, tiendas, minimapa, mapa local y atlas.
 - `dist/legends.js`, `legends-ui.js`, `legends.css`: catálogo de 94 eventos, objetivos físicos, rituales, diario, seguimiento, captura única, reintentos y migración.
+- `dist/uniques.js`: escondites de campo, mini-eventos al 10 %, oleadas, jefes y reaparición con 50 % menos por fallo.
+- `dist/pace-ui.js`: controles de campaña personalizada (regiones y gimnasios) para la bienvenida y el atlas.
+- `tools/verify_uniques.mjs`: 17 escondites, 13 mini-eventos, tasas de aparición, oleadas, captura única y validación; `tools/derive_headbutt.mjs` añade Golpe Cabeza a los datos de campo.
 - `tools/verify_legends.mjs`: cobertura del catálogo, 846 objetivos en tres semillas, gates regionales, tres rituales, reintentos, IV, PS, captura y validación.
 - `dist/combat.js`: coordenadas X/Z, energía, stamina, estados, IA, captura y equipo durante la pelea.
 - `dist/arena-art.js`: proyección de suelo 3D, sprites en perspectiva y efectos de ataques.
@@ -155,6 +174,8 @@ Los pasos abiertos, las rocas movidas y el último centro se guardan. La partida
 
 ```bash
 node tools/verify_legends.mjs
+node tools/verify_uniques.mjs
+node tools/verify_pace.mjs
 node tools/verify_skill_branches.mjs
 node tools/verify_melee.mjs
 node tools/verify_starters.mjs
@@ -210,3 +231,16 @@ La verificación Canvas/DOM cubre el viaje completo por teclado: nuevo starter, 
 ## Descargas (0.22)
 
 `tools/build_downloads.py` reconstruye los ZIP completos y sus partes de hasta 20 MiB. `dist/descargas.html` verifica y reúne las partes para guardar un único ZIP. El proyecto descargado contiene todos los archivos del juego; para reconstruir sus propias descargas, ejecutar el importador de paquetes. `node tools/build_site.mjs` prepara `dist/client/` para publicar, conservando XML y sombras originales en el código y los ZIP. El juego desplegado sirve las hojas necesarias para jugar; el JSON de animaciones también está en el ZIP de recursos.
+
+## Modos de juego y nueva partida
+
+«Comenzar aventura» abre ahora la pantalla **¿Cómo quieres jugar?** con tres pasos: modo, duración y semilla.
+
+- **Modos** (`dist/game-modes.js`, se guardan en `state.gameMode`; las partidas antiguas juegan como Clásico): **Clásico**; **Relajado** (+50 % XP y dinero, rivales −25 % de daño, captura desde 50 % de PS, perder no cuesta); **Desafío** (rivales +30 % de daño, sin curas en combate, perder cuesta el doble, +20 % XP); **Nuzlocke** (solo el primer salvaje de cada zona; los debilitados se liberan; si cae todo el equipo el reto termina y sigue en Clásico); **Exploración libre** (todas las regiones de la campaña abiertas desde el inicio, niveles según distancia).
+- **Duración**: Exprés (1 gimnasio por región), Corta (3), Estándar (5), Completa (9) y Personalizada. Exprés y Estándar usan internamente la campaña personalizada con las nueve regiones.
+- Interfaz: la cruz de cierre de las ventanas queda fija en la esquina y ya no tapa la barra de atajos; una sola barra de desplazamiento por ventana; el menú de aventura no desborda en móvil.
+- `mockups/mapas-gen4.html`: propuesta visual de ciudades y rutas estilo 4ª generación.
+
+## Edificios de ciudad (Tuxemon)
+
+Los edificios de las ciudades usan sprites de «Core Buildings» del proyecto libre Tuxemon (CC BY-SA 4.0; créditos completos en `dist/assets/buildings/CREDITOS.md` y en «Sprites y diseño»). `dist/buildings-tux.js` dibuja cada sprite al doble (casillas de 16 → 32 px) y ajusta la huella del edificio al ancho del sprite manteniendo el centro y la base, así que puertas y puntos de interacción no cambian. Centro → centro rojo con cruz, Tienda/Mercado → tienda azul, Laboratorio → edificio de cristal, Gimnasio → edificio de franjas doradas con el emblema del tipo, Academia → edificio blanco, Casa de tipos y Dojo → locales con cartel, casas → tres casas de troncos según el color del tejado. Menú → «Edificios: Tuxemon / clásicos» vuelve al arte anterior (recarga la página).
